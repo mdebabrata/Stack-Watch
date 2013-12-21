@@ -1,0 +1,15 @@
+#:kivy 1.0
+
+<CheckScreen>:
+    Label:
+        id: label
+        text: "Latest Question is : "
+        pos_hint: {'x':0,'y':.5}
+        size_hint: 1,0.4
+
+    Button:
+        text: "Find out"
+        pos_hint: {'x':.2,'y':0}
+        size_hint: .5,.2
+        on_press: root.check()
+
