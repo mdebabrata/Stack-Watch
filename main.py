@@ -1,23 +1,31 @@
 import requests
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
+from kivy.config import Config
 import threading
 import win32api
+import time
 
+Config.set('graphics', 'width', '400')
+Config.set('graphics', 'height', '200')
 
 class CheckScreen(FloatLayout):
-    def check(self):
-        data = threading.Thread(target=self.get_data)
-        data.start()
+    def initiate(self):
+        notify = threading.Thread(target=self.notification)
+        notify.start()
 
-    def get_data(self):
-        self.payload = {'pagesize':1,'sort':'creation','tagged':'python','site':'stackoverflow'}
-        self.url = requests.get('https://api.stackexchange.com/2.1/questions',params=self.payload)
-        self.data = self.url.json()["items"][0]
-        self.ids.label.text += self.data["title"]
-        #Beep! Beep! Beep!
-        win32api.MessageBeep()
-
+    def notification(self):
+        self.old_title = ''
+        while True:
+            self.payload = {'pagesize':1,'sort':'creation','tagged':'python','site':'stackoverflow'}
+            self.url = requests.get('https://api.stackexchange.com/2.1/questions',params=self.payload)
+            self.data = self.url.json()["items"][0]
+            self.new_title =  self.url.json()["items"][0]["title"]
+            if self.new_title != self.old_title:
+                #Beep! Beep! Beep!
+                win32api.MessageBeep()
+            self.old_title = self.new_title
+            time.sleep(float(self.ids.delay.text))
 
 class MainApp(App):
     def build(self):
@@ -35,8 +43,8 @@ Might wanna look at:
 --- http://stackoverflow.com/questions/1025029/how-to-use-win32-apis-with-python
 --- http://www.brunningonline.net/simon/blog/archives/SysTrayIcon.py.html
 
-
 """
+
 """
 Implement Threading
 """

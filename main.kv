@@ -2,14 +2,30 @@
 
 <CheckScreen>:
     Label:
-        id: label
-        text: "Latest Question is : "
-        pos_hint: {'x':0,'y':.5}
-        size_hint: 1,0.4
+        text: "Tags : "
+        pos_hint: {'x':.02,'y':.75}
+        size_hint: .2,.2
+    TextInput:
+        id: tags
+        multiline: False
+        pos_hint: {'x':.25,'y':.75}
+        size_hint: .7,.2
+        text: "python"
+
+    Label:
+        text: "Delay : "
+        pos_hint: {'x':0.02,'y':.5}
+        size_hint: .2,.2
+
+    TextInput:
+        id: delay
+        multiline: False
+        pos_hint: {'x':.25,'y':.5}
+        size_hint: .7,.2
+        text: "3"
 
     Button:
-        text: "Find out"
-        pos_hint: {'x':.2,'y':0}
-        size_hint: .5,.2
-        on_press: root.check()
-
+        text: "Start"
+        pos_hint: {'x':.59,'y':0.01}
+        size_hint: .4,.2
+        on_press: root.initiate()
