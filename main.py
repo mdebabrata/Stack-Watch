@@ -7,30 +7,45 @@ from kivy.config import Config
 import threading
 import win32api
 import time
+import sys
 
 Config.set('graphics', 'width', '400')
 Config.set('graphics', 'height', '200')
 
 class CheckScreen(FloatLayout):
     def initiate(self):
+        """Starts the notification thread"""
         self.ids.start_button.enabled = False
         notify = threading.Thread(target=self.notification)
         notify.start()
 
     def notification(self):
-        self.old_title = ''
-        self.payload = {'pagesize': 1, 'sort': 'creation', 'tagged': 'python','site': 'stackoverflow'}
+        """Creates the notifications"""
+        tags = [i.strip() for i in self.ids.tags.text.split(',')]
+        self.old_title = {tag:'' for tag in tags}
+        self.new_title = {}
+        print self.old_title
         while True:
-            self.url = requests.get('https://api.stackexchange.com/2.1/questions',params=self.payload)
-            self.data = self.url.json()["items"][0]
-            self.new_title =  self.data["title"]
-            if self.new_title != self.old_title:
+            for tag in tags:
+                self.new_title[tag] =  self.get_new_title(tag)
                 print self.new_title
-                print self.old_title
-                #Beep! Beep! Beep!
-                win32api.MessageBeep()
-            self.old_title = self.new_title
+                if self.new_title[tag] != self.old_title[tag]:
+                    win32api.MessageBeep() #Beep! Beep! Beep!
+                self.old_title = self.new_title
+
             time.sleep(float(self.ids.delay.text))
+
+    def get_new_title(self,tag):
+        """This method gets the latest title of the given tag"""
+        payload = {'pagesize': 1, 'sort': 'creation', 'tagged': tag,'site': 'stackoverflow'}
+        url = requests.get('https://api.stackexchange.com/2.1/questions',params= payload)
+        print url.url
+        avg_size = sys.getsizeof(url.json()) # This might be useful sometime later
+        title = url.json()["items"][0]["title"]
+        return title
+
+    #def logger(self,size,time_per_request):
+
 
 class StartButton(Button):
     enabled = BooleanProperty(True)
@@ -46,6 +61,7 @@ class StartButton(Button):
     def on_touch_down( self, touch ):
         if self.enabled:
             return super(self.__class__, self).on_touch_down(touch)
+
 
 class MainApp(App):
     def build(self):
