@@ -1,4 +1,4 @@
-StackOverflow-Watch
+Stack-Watch
 ===================
 
 This app is a notifier for [Stack Overflow](http://stackoverflow.com/), We all like to see, answer and learn 
