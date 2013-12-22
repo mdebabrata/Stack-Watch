@@ -4,6 +4,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.button import Button
 from kivy.properties import BooleanProperty
 from kivy.config import Config
+from windows_popup import WindowsBalloonTip
 import threading
 import win32api
 import time
@@ -12,37 +13,53 @@ import sys
 Config.set('graphics', 'width', '400')
 Config.set('graphics', 'height', '200')
 
+
 class CheckScreen(FloatLayout):
     def initiate(self):
         """Starts the notification thread"""
         self.ids.start_button.enabled = False
+        self.first_run = True
         notify = threading.Thread(target=self.notification)
         notify.start()
 
     def notification(self):
         """Creates the notifications"""
         tags = [i.strip() for i in self.ids.tags.text.split(',')]
-        self.old_title = {tag:'' for tag in tags}
-        self.new_title = {}
-        print self.old_title
+        old = {tag:'' for tag in tags}
+        new = {}
+        from_date = None
+        first_run = True
         while True:
             for tag in tags:
-                self.new_title[tag] =  self.get_new_title(tag)
-                print self.new_title
-                if self.new_title[tag] != self.old_title[tag]:
-                    win32api.MessageBeep() #Beep! Beep! Beep!
-                self.old_title = self.new_title
+                new[tag] =  self.get_new_title(tag,after=from_date)
+                #print new[tag]
+                from_date = new[tag][-1][1]
+                if not first_run:
+                    if new[tag][-1][0] != old[tag][-1][0]:
+                        win32api.MessageBeep() #Beep! Beep! Beep!
+                        number_of_qs = len(new[tag]) #Number of Questions
+                        title = '{} new questions '.format(number_of_qs) if number_of_qs>1 else '{} new question '.format(1)
+                        msg = '{} Latest : "{}"'.format(tag,new[tag][0][0])
+                        popup = WindowsBalloonTip(title,msg)
+                old = new
+                first_run = False
 
-            time.sleep(float(self.ids.delay.text))
+            time.sleep(60*float(self.ids.delay.text))
 
-    def get_new_title(self,tag):
+    def get_new_title(self,tag,after=None):
         """This method gets the latest title of the given tag"""
         payload = {'pagesize': 1, 'sort': 'creation', 'tagged': tag,'site': 'stackoverflow'}
+        if after:
+            payload["fromdate"] = after
+            del payload['pagesize']
         url = requests.get('https://api.stackexchange.com/2.1/questions',params= payload)
-        print url.url
-        avg_size = sys.getsizeof(url.json()) # This might be useful sometime later
-        title = url.json()["items"][0]["title"]
-        return title
+        #print url.url
+        data = url.json()["items"]
+        time_asked =  [data[i]["creation_date"] for i in xrange(len(data))]
+        #avg_size = sys.getsizeof(url.json()) # This might be useful sometime later
+        title = [data[i]["title"] for i in xrange(len(data))]
+
+        return zip(title,time_asked)
 
     #def logger(self,size,time_per_request):
 
