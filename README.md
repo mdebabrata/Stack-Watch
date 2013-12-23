@@ -12,3 +12,9 @@ The app itself is pretty much not yet ready So expect a ton of bugs, and Its lac
 but just hold on they will arrive quickly as possible :)
 
 +1 For StackOverflow :)
+
+
+A example notification:
+
+
+![](http://i.imgur.com/QXBrDvA.png)

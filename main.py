@@ -13,6 +13,7 @@ import sys
 Config.set('graphics', 'width', '400')
 Config.set('graphics', 'height', '200')
 
+
 class CheckScreen(FloatLayout):
     def initiate(self):
         """Starts the notification thread"""
@@ -28,21 +29,22 @@ class CheckScreen(FloatLayout):
         new = {}
         from_date = {tag:None for tag in tags}
         first_run = {tag:True for tag in tags}
-        print first_run
+        #print first_run
         while True:
             for tag in tags:
                 if not first_run[tag]:
-                    print  '******'
+                    #print  '******'
                     new[tag] =  self.get_new_title(tag,after=from_date[tag])
-                    print new[tag]
+                    #print new[tag]
                     from_date[tag] = new[tag][0][1] if new[tag] else None
-                    print from_date[tag]
+                    #print from_date[tag]
                     if new[tag][0][0] != old[tag][-1][0]:
                         win32api.MessageBeep() #Beep! Beep! Beep!
                         number_of_qs = len(new[tag])-1 #Number of Questions
-                        title = '{} new {} questions '.format(number_of_qs,tag) if number_of_qs>1 else '{} new {} question '.format(1,tag)
+                        title = '{} new {} questions '.format(number_of_qs,tag) \
+                                if number_of_qs>1 else '{} new {} question '.format(1,tag)
                         msg = '{} Latest : "{}"'.format(tag,new[tag][0][0])
-                        print title
+                        #print title
                         popup = balloon_tip(title,msg)
                 else:
                     new[tag] =  self.get_new_title(tag)
@@ -50,7 +52,7 @@ class CheckScreen(FloatLayout):
 
                 old = new
                 first_run[tag] = False
-                print '******'+str(first_run)
+                #print '******'+str(first_run)
 
             time.sleep(60*float(self.ids.delay.text))
 
