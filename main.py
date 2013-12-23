@@ -5,6 +5,7 @@ from kivy.uix.button import Button
 from kivy.properties import BooleanProperty
 from kivy.config import Config
 from windows_popup import balloon_tip
+from utils import arithmeticEval
 import threading
 import win32api
 import time
@@ -53,7 +54,7 @@ class CheckScreen(FloatLayout):
                 old[tag] = list(new[tag])
                 first_run[tag] = False
 
-            time.sleep(60*float(self.ids.delay.text))
+            time.sleep(60*arithmeticEval(self.ids.delay.text))
 
     def get_new_title(self,tag,after=None):
         """This method gets the latest title of the given tag"""
