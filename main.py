@@ -4,7 +4,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.button import Button
 from kivy.properties import BooleanProperty
 from kivy.config import Config
-from windows_popup import WindowsBalloonTip
+from windows_popup import balloon_tip
 import threading
 import win32api
 import time
@@ -12,7 +12,6 @@ import sys
 
 Config.set('graphics', 'width', '400')
 Config.set('graphics', 'height', '200')
-
 
 class CheckScreen(FloatLayout):
     def initiate(self):
@@ -27,22 +26,31 @@ class CheckScreen(FloatLayout):
         tags = [i.strip() for i in self.ids.tags.text.split(',')]
         old = {tag:'' for tag in tags}
         new = {}
-        from_date = None
-        first_run = True
+        from_date = {tag:None for tag in tags}
+        first_run = {tag:True for tag in tags}
+        print first_run
         while True:
             for tag in tags:
-                new[tag] =  self.get_new_title(tag,after=from_date)
-                #print new[tag]
-                from_date = new[tag][-1][1]
-                if not first_run:
-                    if new[tag][-1][0] != old[tag][-1][0]:
+                if not first_run[tag]:
+                    print  '******'
+                    new[tag] =  self.get_new_title(tag,after=from_date[tag])
+                    print new[tag]
+                    from_date[tag] = new[tag][0][1] if new[tag] else None
+                    print from_date[tag]
+                    if new[tag][0][0] != old[tag][-1][0]:
                         win32api.MessageBeep() #Beep! Beep! Beep!
-                        number_of_qs = len(new[tag]) #Number of Questions
-                        title = '{} new questions '.format(number_of_qs) if number_of_qs>1 else '{} new question '.format(1)
+                        number_of_qs = len(new[tag])-1 #Number of Questions
+                        title = '{} new {} questions '.format(number_of_qs,tag) if number_of_qs>1 else '{} new {} question '.format(1,tag)
                         msg = '{} Latest : "{}"'.format(tag,new[tag][0][0])
-                        popup = WindowsBalloonTip(title,msg)
+                        print title
+                        popup = balloon_tip(title,msg)
+                else:
+                    new[tag] =  self.get_new_title(tag)
+                    from_date[tag] = new[tag][0][1]
+
                 old = new
-                first_run = False
+                first_run[tag] = False
+                print '******'+str(first_run)
 
             time.sleep(60*float(self.ids.delay.text))
 
@@ -56,7 +64,7 @@ class CheckScreen(FloatLayout):
         #print url.url
         data = url.json()["items"]
         time_asked =  [data[i]["creation_date"] for i in xrange(len(data))]
-        #avg_size = sys.getsizeof(url.json()) # This might be useful sometime later
+        #avg_size = sys.getsizeof(url.json()) # This might be useful sometime later to log size of each request
         title = [data[i]["title"] for i in xrange(len(data))]
 
         return zip(title,time_asked)
