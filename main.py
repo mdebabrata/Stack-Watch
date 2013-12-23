@@ -35,22 +35,23 @@ class CheckScreen(FloatLayout):
                 if not first_run[tag]:
                     #print  '******'
                     new[tag] =  self.get_new_title(tag,after=from_date[tag])
-                    #print new[tag]
+                    #print "new {} : {} ".format(tag, new[tag])
+                    #print "old {} : {} \n".format(tag, old[tag])
                     from_date[tag] = new[tag][0][1] if new[tag] else None
                     #print from_date[tag]
-                    if new[tag][0][0] != old[tag][-1][0]:
-                        win32api.MessageBeep() #Beep! Beep! Beep!
-                        number_of_qs = len(new[tag])-1 #Number of Questions
+                    if new[tag][0][0] != old[tag][0][0]:
+                        win32api.MessageBeep()  #Beep! Beep! Beep!
+                        number_of_qs = len(new[tag])-1  #Number of Questions
                         title = '{} new {} questions '.format(number_of_qs,tag) \
                                 if number_of_qs>1 else '{} new {} question '.format(1,tag)
                         msg = '{} Latest : "{}"'.format(tag,new[tag][0][0])
                         #print title
                         popup = balloon_tip(title,msg)
                 else:
-                    new[tag] =  self.get_new_title(tag)
+                    new[tag] = self.get_new_title(tag)
                     from_date[tag] = new[tag][0][1]
 
-                old = new
+                old[tag] = list(new[tag])
                 first_run[tag] = False
                 #print '******'+str(first_run)
 
@@ -58,7 +59,7 @@ class CheckScreen(FloatLayout):
 
     def get_new_title(self,tag,after=None):
         """This method gets the latest title of the given tag"""
-        payload = {'pagesize': 1, 'sort': 'creation', 'tagged': tag,'site': 'stackoverflow'}
+        payload = {'pagesize': 1, 'sort': 'creation', 'tagged': tag, 'site': 'stackoverflow', 'client_id':2416, 'key':'JKpvjcIrXZ3fUITWvszu6A(('}
         if after:
             payload["fromdate"] = after
             del payload['pagesize']
@@ -108,5 +109,9 @@ Might wanna look at:
 
 --- http://docs.activestate.com/activepython/2.7/pywin32/PyWin32.HTML
 --- http://timgolden.me.uk/pywin32-docs/index.html
+
+----------
+- https://github.com/Cereal84/notifyMe
+-----------
 
 """
