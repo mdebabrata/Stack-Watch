@@ -11,10 +11,18 @@ and so I made this app which makes a *sqeaky* beep sound if a new question was a
 The app itself is pretty much not yet ready So expect a ton of bugs, and Its lacking many basic features you'd expect
 but just hold on they will arrive quickly as possible :)
 
-+1 For StackOverflow :)
++1 For [**StackOverflow**](http://stackoverflow.com/) :)
+---------------------------
+#Documenation:
 
+So how the heck do I use it:
 
-A example notification:
+- Firstly set the tags of your interest separated by commas. *eg: `python,c++,java`*
 
+- Set the delay in minutes, Default is to 1 which means it'll check for updates every 1 minute.
 
-![](http://i.imgur.com/QXBrDvA.png)
+- After configuring and starting the process simply close the window and It'll pop a notification whenever it senses there's a new question :)
+
+Drawbacks:
+
+- Only works on windows until someone implements a beep and notification system for linux and mac ;)

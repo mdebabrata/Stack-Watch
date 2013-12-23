@@ -33,8 +33,8 @@ class CheckScreen(FloatLayout):
         while True:
             for tag in tags:
                 if not first_run[tag]:
-                    #print  '******'
                     new[tag] =  self.get_new_title(tag,after=from_date[tag])
+                    ###Below are a couple of debug statements:
                     #print "new {} : {} ".format(tag, new[tag])
                     #print "old {} : {} \n".format(tag, old[tag])
                     from_date[tag] = new[tag][0][1] if new[tag] else None
@@ -45,7 +45,6 @@ class CheckScreen(FloatLayout):
                         title = '{} new {} questions '.format(number_of_qs,tag) \
                                 if number_of_qs>1 else '{} new {} question '.format(1,tag)
                         msg = '{} Latest : "{}"'.format(tag,new[tag][0][0])
-                        #print title
                         popup = balloon_tip(title,msg)
                 else:
                     new[tag] = self.get_new_title(tag)
@@ -53,7 +52,6 @@ class CheckScreen(FloatLayout):
 
                 old[tag] = list(new[tag])
                 first_run[tag] = False
-                #print '******'+str(first_run)
 
             time.sleep(60*float(self.ids.delay.text))
 
