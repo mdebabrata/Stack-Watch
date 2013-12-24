@@ -52,3 +52,4 @@ class WindowsBalloonTip:
 
 def balloon_tip(title, msg):
     w = WindowsBalloonTip(title, msg)
+    return w

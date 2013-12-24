@@ -1,63 +1,62 @@
-import requests
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.button import Button
 from kivy.properties import BooleanProperty
 from kivy.config import Config
-from windows_popup import balloon_tip
-from utils import arithmeticEval
+import requests
 import threading
 import win32api
 import time
 import sys
+from Queue import Queue
+from windows_popup import balloon_tip
+from utils import arithmeticEval
 
 Config.set('graphics', 'width', '400')
 Config.set('graphics', 'height', '200')
 
+Did major revamp to code chck for bugs in the first_run implemtation *I removed it*
 
 class CheckScreen(FloatLayout):
     def initiate(self):
         """Starts the notification thread"""
         self.ids.start_button.enabled = False
         self.first_run = True
-        notify = threading.Thread(target=self.notification)
+        self.popup_queue = Queue()
+        notify = threading.Thread(target=self.manage_notifications)
         notify.start()
 
-    def notification(self):
+    def manage_notifications(self):
         """Creates the notifications"""
         tags = [i.strip() for i in self.ids.tags.text.split(',')]
-        old = {tag:'' for tag in tags}
-        new = {}
-        from_date = {tag:None for tag in tags}
-        first_run = {tag:True for tag in tags}
-        #print first_run
+        for tag in tags:
+            thread = threading.Thread(target=self.notification,args=(tag,))
+            thread.start()
+            popup_manager = threading.Thread(target=self.popup_manager)
+            popup_manager.start()
+
+    def notification(self,tag):
+        print 'Initiated : ' + tag
+        old = [['']]
+        new = ''
+        from_date = None
         while True:
-            for tag in tags:
-                if not first_run[tag]:
-                    new[tag] =  self.get_new_title(tag,after=from_date[tag])
-                    ###Below are a couple of debug statements:
-                    #print "new {} : {} ".format(tag, new[tag])
-                    #print "old {} : {} \n".format(tag, old[tag])
-                    from_date[tag] = new[tag][0][1]-1 if new[tag] else None
-                    #print from_date[tag]
-                    if new[tag][0][0] != old[tag][0][0]:
-                        win32api.MessageBeep()  #Beep! Beep! Beep!
-                        number_of_qs = len(new[tag])-1  #Number of Questions
-                        title = '{} new {} questions '.format(number_of_qs,tag) \
-                                if number_of_qs>1 else '{} new {} question '.format(1,tag)
-                        msg = '{} Latest : "{}"'.format(tag,new[tag][0][0])
-                        popup = balloon_tip(title,msg)
-                else:
-                    new[tag] = self.get_new_title(tag)
-                    from_date[tag] = new[tag][0][1]-1  #Sometimes the API can be buggy
-
-                old[tag] = list(new[tag])
-                first_run[tag] = False
-
+            new =  self.get_new_title(tag,after=from_date)
+            print new
+            from_date = new[0][1] -1 if new else None
+            if new[0][0] != old[0][0]:
+                win32api.MessageBeep()  #Beep! Beep! Beep!
+                number_of_qs = len(new)-1  #Number of Questions
+                title = '{} new {} questions '.format(number_of_qs,tag) \
+                    if number_of_qs>1 else '{} new {} question '.format(1,tag)
+                msg = '{} Latest : "{}"'.format(tag,new[0][0])
+                self.popup_queue.put([(title,msg)])
+            old = list(new)
             time.sleep(60*arithmeticEval(self.ids.delay.text))
 
+
     def get_new_title(self,tag,after=None):
-        """This method gets the latest title of the given tag"""
+        """This method gets the latest titles of the given tag after a certain time which is specified by "after" """
         payload = {'pagesize': 1, 'sort': 'creation', 'tagged': tag, 'site': 'stackoverflow', 'client_id':2416, 'key':'JKpvjcIrXZ3fUITWvszu6A(('}
         if after:
             #print "tag : {} after value : {}".format(tag,after)
@@ -71,6 +70,14 @@ class CheckScreen(FloatLayout):
         title = [data[i]["title"] for i in xrange(len(data))]
 
         return zip(title,time_asked)
+
+
+    def popup_manager(self):
+        while True:
+            print 'sdyo {} sdsddsd'.format(self.popup_queue.get())
+            for popup in self.popup_queue.get():
+                print 'k',popup
+                popup = balloon_tip(popup[0],popup[1])
 
     #def logger(self,size,time_per_request):
 
