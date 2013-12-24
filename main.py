@@ -38,7 +38,7 @@ class CheckScreen(FloatLayout):
                     ###Below are a couple of debug statements:
                     #print "new {} : {} ".format(tag, new[tag])
                     #print "old {} : {} \n".format(tag, old[tag])
-                    from_date[tag] = new[tag][0][1] if new[tag] else None
+                    from_date[tag] = new[tag][0][1]-1 if new[tag] else None
                     #print from_date[tag]
                     if new[tag][0][0] != old[tag][0][0]:
                         win32api.MessageBeep()  #Beep! Beep! Beep!
@@ -49,7 +49,7 @@ class CheckScreen(FloatLayout):
                         popup = balloon_tip(title,msg)
                 else:
                     new[tag] = self.get_new_title(tag)
-                    from_date[tag] = new[tag][0][1]
+                    from_date[tag] = new[tag][0][1]-1  #Sometimes the API can be buggy
 
                 old[tag] = list(new[tag])
                 first_run[tag] = False
@@ -60,6 +60,7 @@ class CheckScreen(FloatLayout):
         """This method gets the latest title of the given tag"""
         payload = {'pagesize': 1, 'sort': 'creation', 'tagged': tag, 'site': 'stackoverflow', 'client_id':2416, 'key':'JKpvjcIrXZ3fUITWvszu6A(('}
         if after:
+            #print "tag : {} after value : {}".format(tag,after)
             payload["fromdate"] = after
             del payload['pagesize']
         url = requests.get('https://api.stackexchange.com/2.1/questions',params= payload)
