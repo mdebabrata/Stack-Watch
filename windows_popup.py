@@ -13,6 +13,7 @@ class WindowsBalloonTip:
         message_map = {win32con.WM_DESTROY: self.OnDestroy, }
         # Register the Window class.
         wc = win32gui.WNDCLASS()
+        self.destroyed = False
         hinst = wc.hInstance = GetModuleHandle(None)
         wc.lpszClassName = "PythonTaskbar"
         wc.lpfnWndProc = message_map    # could also specify a wndproc.
@@ -43,11 +44,15 @@ class WindowsBalloonTip:
         time.sleep(10)
         win32gui.DestroyWindow(self.hwnd)
         win32gui.UnregisterClass(class_atom, hinst)
+        self.destroyed = True
 
     def OnDestroy(self, hwnd, msg, wparam, lparam):
         nid = (self.hwnd, 0)
         win32gui.Shell_NotifyIcon(win32gui.NIM_DELETE, nid)
         win32gui.PostQuitMessage(0)  # Terminate the app.
+
+    def isDestroyed(self):
+        return self.destroyed
 
 
 def balloon_tip(title, msg):
