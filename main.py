@@ -45,18 +45,19 @@ class CheckScreen(FloatLayout):
         from_date = None
         first_run = True
         while True:
-            new =  self.get_new_title(tag,after=from_date)
+            request = self.get_new_title(tag,after=from_date)
+            new =  request if request else None
             from_date = new[0][1] -1 if new else None
+            if new:
+                if new[0][0] != old[0][0] and not first_run:
+                    win32api.MessageBeep()  #Beep! Beep! Beep!
+                    number_of_qs = len(new)-1  #Number of Questions
 
-            if new[0][0] != old[0][0] and not first_run:
-                win32api.MessageBeep()  #Beep! Beep! Beep!
-                number_of_qs = len(new)-1  #Number of Questions
+                    title = '{} new {} questions '.format(number_of_qs,tag) \
+                        if number_of_qs>1 else '{} new {} question '.format(1,tag)
 
-                title = '{} new {} questions '.format(number_of_qs,tag) \
-                    if number_of_qs>1 else '{} new {} question '.format(1,tag)
-
-                msg = '{} Latest : "{}"'.format(tag,new[0][0])
-                self.popup_queue.put([(title,msg)])
+                    msg = '{} Latest : "{}"'.format(tag,new[0][0])
+                    self.popup_queue.put([(title,msg)])
 
             old = list(new)
             first_run = False
@@ -75,7 +76,7 @@ class CheckScreen(FloatLayout):
             del payload['pagesize']
 
         url = requests.get('https://api.stackexchange.com/2.1/questions',params= payload)
-        #print url.url
+        print url.url
         data = url.json()["items"]
         time_asked =  [data[i]["creation_date"] for i in xrange(len(data))]
         #avg_size = sys.getsizeof(url.json()) # This might be useful sometime later to log size of each request
