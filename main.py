@@ -5,11 +5,11 @@ from kivy.properties import BooleanProperty
 from kivy.config import Config
 import requests
 import threading
-import win32api
+#import win32api
 import time
 import sys
 from Queue import Queue
-from windows_popup import balloon_tip
+#from windows_popup import balloon_tip
 from utils import arithmeticEval
 
 Config.set('graphics', 'width', '400')
@@ -50,7 +50,7 @@ class CheckScreen(FloatLayout):
             from_date = new[0][1] -1 if new else None
             if new:
                 if new[0][0] != old[0][0] and not first_run:
-                    win32api.MessageBeep()  #Beep! Beep! Beep!
+                    #win32api.MessageBeep()  #Beep! Beep! Beep!
                     number_of_qs = len(new)-1  #Number of Questions
 
                     title = '{} new {} questions '.format(number_of_qs,tag) \
@@ -58,8 +58,7 @@ class CheckScreen(FloatLayout):
 
                     msg = '{} Latest : "{}"'.format(tag,new[0][0])
                     self.popup_queue.put([(title,msg)])
-
-            old = list(new)
+                old = list(new)
             first_run = False
             time.sleep(arithmeticEval(self.ids.delay.text))
 
@@ -76,7 +75,6 @@ class CheckScreen(FloatLayout):
             del payload['pagesize']
 
         url = requests.get('https://api.stackexchange.com/2.1/questions',params= payload)
-        print url.url
         data = url.json()["items"]
         time_asked =  [data[i]["creation_date"] for i in xrange(len(data))]
         #avg_size = sys.getsizeof(url.json()) # This might be useful sometime later to log size of each request
